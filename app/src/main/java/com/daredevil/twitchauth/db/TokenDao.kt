@@ -14,6 +14,6 @@ interface TokenDao {
     @Insert(onConflict = REPLACE)
     fun insertToken(token: Token)
 
-    @Query("SELECT * FROM tokens WHERE  id = :id")
-    fun getToken(id: String): LiveData<Token>
+    @Query("SELECT * FROM tokens WHERE  id = 0")
+    fun getToken(): LiveData<Token>
 }

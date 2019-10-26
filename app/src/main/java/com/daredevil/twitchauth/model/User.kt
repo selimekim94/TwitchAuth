@@ -11,6 +11,7 @@ data class User(
     @PrimaryKey
     @Expose
     @SerializedName("id")
+    @ColumnInfo(name = "id")
     val id: String,
 
     @Expose

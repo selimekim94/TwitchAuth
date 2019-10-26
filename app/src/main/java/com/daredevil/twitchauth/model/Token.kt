@@ -8,8 +8,9 @@ import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "tokens")
 data class Token(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    @PrimaryKey
+    @ColumnInfo(name = "id", defaultValue = "0")
+    val id: String,
 
     @Expose
     @SerializedName("access_token")

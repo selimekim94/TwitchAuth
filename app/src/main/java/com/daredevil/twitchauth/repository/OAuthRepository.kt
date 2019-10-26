@@ -29,7 +29,7 @@ class OAuthRepository @Inject constructor(
             }
 
             override fun loadFromDb(): LiveData<Token> {
-                return tokenDao.getToken("1")
+                return tokenDao.getToken()
             }
 
             override fun createCall(): LiveData<ApiResponse<Token>> {

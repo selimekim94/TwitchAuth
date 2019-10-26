@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.daredevil.twitchauth.R
 import com.daredevil.twitchauth.util.Constants
+import com.daredevil.twitchauth.util.Resource
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -50,13 +51,23 @@ class MainActivity : DaggerAppCompatActivity() {
             code = code,
             redirectUri = Constants.REDIRECT_URI
         ).observe(this, Observer { resource ->
-            resource.data?.let { token ->
-                println("DEBUG: $token")
-                getUser(token.accessToken)
-            }
+            when (resource) {
+                is Resource.Loading -> {
+                    println("DEBUG: Loading")
+                }
 
-            resource.message?.let { message ->
-                println("DEBUG: $message")
+                is Resource.Success -> {
+                    resource.data?.let { token ->
+                        println("DEBUG: $token")
+                        getUser(token.accessToken)
+                    }
+                }
+
+                is Resource.Error -> {
+                    resource.message?.let { message ->
+                        println("DEBUG: $message")
+                    }
+                }
             }
         })
     }
@@ -64,13 +75,24 @@ class MainActivity : DaggerAppCompatActivity() {
     private fun getUser(accessToken: String) {
         mainViewModel.getUser(accessToken = accessToken, clientId = Constants.CLIENT_ID)
             .observe(this, Observer { resource ->
-                resource.data?.let { user ->
-                    println("DEBUG: $user")
-                    Toast.makeText(this, user.toString(), Toast.LENGTH_LONG).show()
-                }
 
-                resource.message?.let { message ->
-                    println("DEBUG: $message")
+                when (resource) {
+                    is Resource.Loading -> {
+                        println("DEBUG: Loading")
+                    }
+
+                    is Resource.Success -> {
+                        resource.data?.let { user ->
+                            println("DEBUG: $user")
+                            Toast.makeText(this, user.toString(), Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        resource.message?.let { message ->
+                            println("DEBUG: $message")
+                        }
+                    }
                 }
             })
     }
