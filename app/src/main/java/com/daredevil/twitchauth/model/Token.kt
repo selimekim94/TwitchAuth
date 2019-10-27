@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName
 @Entity(tableName = "tokens")
 data class Token(
     @PrimaryKey
-    @ColumnInfo(name = "id", defaultValue = "0")
+    @ColumnInfo(name = "id", defaultValue = "1")
     val id: String,
 
     @Expose
