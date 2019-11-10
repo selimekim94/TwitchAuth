@@ -27,55 +27,35 @@ class MainActivity : DaggerAppCompatActivity() {
         login_button.setOnClickListener { view ->
             val intent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse("https://id.twitch.tv/oauth2/authorize?client_id=${Constants.CLIENT_ID}&redirect_uri=${Constants.REDIRECT_URI}&response_type=code&scope=${Constants.SCOPE}")
+                Uri.parse("${Constants.OAUTH_ENDPOINT}authorize?client_id=${Constants.CLIENT_ID}&redirect_uri=${Constants.REDIRECT_URI}&response_type=code&scope=${Constants.SCOPE}")
             )
             startActivity(intent)
         }
 
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val uri = intent.data
-
-        if (uri != null && uri.toString().startsWith(Constants.REDIRECT_URI)) {
-            println("DEBUG: $uri")
-            getAccessToken(uri.getQueryParameter("code") ?: "")
-        }
-    }
-
-    private fun getAccessToken(code: String) {
-        mainViewModel.getAccessToken(
-            clientId = Constants.CLIENT_ID,
-            clientSecret = Constants.CLIENT_SECRET,
-            code = code,
-            redirectUri = Constants.REDIRECT_URI
-        ).observe(this, Observer { resource ->
-            when (resource) {
-                is Resource.Loading -> {
-                    println("DEBUG: Loading")
-                }
-
-                is Resource.Success -> {
-                    resource.data?.let { token ->
-                        println("DEBUG: $token")
-                        getUser(token.accessToken)
-                    }
-                }
-
-                is Resource.Error -> {
-                    resource.message?.let { message ->
-                        println("DEBUG: $message")
-                    }
-                }
-            }
-        })
-    }
-
-    private fun getUser(accessToken: String) {
-        mainViewModel.getUser(accessToken = accessToken, clientId = Constants.CLIENT_ID)
+        mainViewModel.login
             .observe(this, Observer { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        println("DEBUG: Loading")
+                    }
 
+                    is Resource.Success -> {
+                        resource.data?.let { token ->
+                            println("DEBUG: $token")
+                            mainViewModel.setAccessToken(token.accessToken)
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        resource.message?.let { message ->
+                            println("DEBUG: $message")
+                        }
+                    }
+                }
+            })
+
+        mainViewModel.user
+            .observe(this, Observer { resource ->
                 when (resource) {
                     is Resource.Loading -> {
                         println("DEBUG: Loading")
@@ -96,4 +76,15 @@ class MainActivity : DaggerAppCompatActivity() {
                 }
             })
     }
+
+    override fun onResume() {
+        super.onResume()
+        val uri = intent.data
+
+        if (uri != null && uri.toString().startsWith(Constants.REDIRECT_URI)) {
+            println("DEBUG: $uri")
+            mainViewModel.setCode(uri.getQueryParameter("code") ?: "")
+        }
+    }
+
 }
